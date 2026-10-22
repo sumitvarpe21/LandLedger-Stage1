@@ -100,13 +100,65 @@ registered parcel boundaries on the map to view their details and ownership
 history. Existing parcels that have only a location coordinate remain displayed
 as point markers.
 
-## 5. Start the Spring Boot backend
+## 5. Optional: enable local blockchain proofs
+
+The app can anchor approved parcel registrations and ownership transfers to a
+local Ethereum-compatible development chain. PostgreSQL remains the registry
+database. The chain stores only a salted SHA-256 proof, not parcel documents or
+personal details. This is for local development/demo use, not a legally
+authoritative land registry.
+
+No wallet login, external account, API key, or real cryptocurrency is needed.
+The local chain provides a development account and test funds. Keep its RPC
+server on this computer and do not expose port 8545 to the internet. Hardhat
+prints public test-account keys in its startup log; never use or fund those
+accounts on a live network.
+
+In a separate PowerShell window, install and start the local chain:
+
+```powershell
+cd C:\Users\ADMIN\Downloads\LandLedger-Stage1\landledger-chain
+npm install
+npm run chain
+```
+
+Keep that window open. Open another PowerShell window and deploy the proof
+contract:
+
+```powershell
+cd C:\Users\ADMIN\Downloads\LandLedger-Stage1\landledger-chain
+npm run deploy
+```
+
+Copy the four `LANDLEDGER_BLOCKCHAIN_...` settings printed by deployment into
+`landledger-backend\.env`, then restart the backend. Hardhat's local chain keeps
+its state in memory, so keep its PowerShell window open. Stopping it resets the
+chain; redeploy the contract after restarting. Transaction references from the
+previous local run will no longer exist, so this chain is for temporary demos,
+not long-term records.
+
+New approved registrations (including parcels directly created by an Admin)
+and approved ownership transfers will show `PENDING`, then `CONFIRMED` with a
+transaction reference when processed. Existing history entries are not
+backfilled. If the chain is stopped, the PostgreSQL approval still completes
+and the proof is retried when the chain returns. To run without blockchain,
+leave `LANDLEDGER_BLOCKCHAIN_ENABLED=false` (the default).
+
+## 6. Install Java and Maven, then start the Spring Boot backend
+
+The backend requires Java 21 or newer and Apache Maven. Install them if needed,
+then check:
+
+```powershell
+java -version
+mvn -version
+```
 
 Open a PowerShell window in `C:\Users\ADMIN\Downloads\LandLedger-Stage1\landledger-backend`
 and run:
 
 ```powershell
-.\mvnw.cmd spring-boot:run
+mvn spring-boot:run
 ```
 
 The health API listens on `http://localhost:8081/api/health` so it does not
@@ -123,7 +175,7 @@ Expected response:
 {"status":"UP","service":"LandLedger Backend"}
 ```
 
-## 6. Start the app
+## 7. Start the app
 
 ```powershell
 npm run dev
@@ -156,7 +208,7 @@ To change the backend URL used by the frontend, copy
 The sign-in page shows whether it can reach the backend. Sign-in and registry
 actions use the backend; errors are shown rather than replaced with fake data.
 
-## 7. Sign in
+## 8. Sign in
 
 Register through the app to create a Citizen account. Use the Admin email and
 password you configured in `.env` for the initial administrator. No demo

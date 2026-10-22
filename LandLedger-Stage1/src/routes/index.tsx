@@ -57,7 +57,7 @@ function Index() {
           <span className="font-display text-2xl font-bold">LandLedger</span>
         </div>
         <div className="max-w-lg">
-          <p className="stamp text-sidebar-primary">Land registry · Stage 1</p>
+          <p className="stamp text-sidebar-primary">Land registry</p>
           <h1 className="mt-3 text-5xl font-bold leading-tight">
             Every parcel, every owner, on the record.
           </h1>
@@ -76,7 +76,6 @@ function Index() {
             </li>
           </ul>
         </div>
-        <p className="stamp opacity-60">Prototype UI · Blockchain not connected</p>
       </section>
       <section className="flex items-center justify-center p-8">
         <form onSubmit={submit} className="w-full max-w-sm space-y-4">

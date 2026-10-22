@@ -62,3 +62,7 @@ Parcel locations are optional applicant-submitted coordinates. The GIS map
 shows parcel boundaries drawn by an administrator and point markers for records
 that only have coordinates. Boundary-derived area is an estimate; map geometry
 does not indicate official verification.
+
+For optional local blockchain proofs, follow the blockchain section in
+[RUN-ON-YOUR-LAPTOP.md](RUN-ON-YOUR-LAPTOP.md). It needs no external account or
+wallet login and is intended for development/demo use only.

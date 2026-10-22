@@ -1,0 +1,16 @@
+{
+  "name": "landledger-local-chain",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "chain": "hardhat node --network hardhatMainnet --hostname 127.0.0.1 --port 8545",
+    "compile": "hardhat compile",
+    "deploy": "npm run compile && node scripts/deploy-contract.mjs"
+  },
+  "dependencies": {
+    "ethers": "^6.15.0"
+  },
+  "devDependencies": {
+    "hardhat": "3.20.0"
+  }
+}

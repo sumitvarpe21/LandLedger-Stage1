@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ClientOnly } from "@tanstack/react-router";
-import { lazy, Suspense, useCallback, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -74,6 +74,17 @@ function Parcels() {
   const { data, loading, error, reload } = useRemoteData(loadParcels);
   const parcels = data ?? [];
   const p = parcels.find((x) => x.parcelId === sel);
+  useEffect(() => {
+    const hasPendingProof = parcels.some((parcel) =>
+      parcel.history.some((entry) => entry.blockchainStatus === "PENDING"),
+    );
+    if (!hasPendingProof) return;
+
+    const interval = window.setInterval(() => {
+      void reload().catch(() => {});
+    }, 5000);
+    return () => window.clearInterval(interval);
+  }, [parcels, reload]);
   const fallback = <div className="h-full animate-pulse bg-muted" />;
   return (
     <div className="space-y-6">
@@ -357,8 +368,9 @@ function Parcels() {
                       <li key={`${h.date}-${h.event}`}>
                         <b>{h.ownerName}</b> — {h.event}
                         <div className="text-xs text-muted-foreground">
-                          {new Date(h.date).toLocaleDateString()} · Tx ref:{" "}
-                          {h.txRef ?? "NOT CONFIGURED"} · Verification: NOT CONNECTED
+                          {new Date(h.date).toLocaleDateString()} · Blockchain:{" "}
+                          {h.blockchainStatus ?? "NOT CONFIGURED"}
+                          {h.txRef ? ` · Tx: ${h.txRef}` : ""}
                         </div>
                       </li>
                     ))}

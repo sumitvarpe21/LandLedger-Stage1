@@ -102,10 +102,12 @@ public final class ApiModels {
 		}
 	}
 
-	public record HistoryView(String ownerName, String event, Instant date, String txRef) {
+	public record HistoryView(
+			String ownerName, String event, Instant date, String txRef, String blockchainStatus) {
 		static HistoryView from(OwnershipHistoryEntry entry, boolean canViewOwner) {
 			return new HistoryView(canViewOwner ? entry.getOwner().getName() : "Owner record",
-				entry.getEvent(), entry.getOccurredAt(), entry.getTransactionReference());
+				entry.getEvent(), entry.getOccurredAt(), entry.getTransactionReference(),
+				entry.getBlockchainStatus());
 		}
 	}
 

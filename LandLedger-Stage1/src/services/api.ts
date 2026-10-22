@@ -53,6 +53,7 @@ export interface HistoryEntry {
   event: string;
   date: string;
   txRef: string | null;
+  blockchainStatus: "PENDING" | "CONFIRMED" | "FAILED" | null;
 }
 
 export interface Parcel extends LandInput {

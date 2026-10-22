@@ -1,9 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { LayoutDashboard, FileText, Map, ArrowLeftRight, Users, LogOut, Landmark, Link2Off } from "lucide-react";
+import { LayoutDashboard, FileText, Map, ArrowLeftRight, Users, LogOut, Landmark } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import type { Role } from "@/services/api";
-import { Badge } from "@/components/ui/badge";
 
 const NAV: { to: "/dashboard" | "/applications" | "/parcels" | "/transfers" | "/admin"; label: string; icon: typeof Map; roles: Role[] }[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["CITIZEN", "OFFICER", "ADMIN"] },
@@ -40,7 +39,6 @@ export function AppShell({ title, roles, children }: { title: string; roles?: Ro
         <header className="flex flex-wrap items-center justify-between gap-3 border-b bg-card px-6 py-4">
           <h1 className="text-2xl font-bold">{title}</h1>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="stamp gap-1 border-destructive/40 text-destructive"><Link2Off className="h-3 w-3" />Blockchain: not connected</Badge>
             <div className="flex gap-2 md:hidden">
               {NAV.filter((n) => n.roles.includes(user.role)).map((n) => <Link key={n.to} to={n.to}><n.icon className="h-5 w-5" /></Link>)}
               <button onClick={() => { signOut(); nav({ to: "/" }) }}><LogOut className="h-5 w-5" /></button>

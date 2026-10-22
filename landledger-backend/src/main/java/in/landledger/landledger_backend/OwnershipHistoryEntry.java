@@ -37,6 +37,21 @@ public class OwnershipHistoryEntry {
 	@Column(name = "transaction_reference", length = 200)
 	private String transactionReference;
 
+	@Column(name = "blockchain_status", length = 24)
+	private String blockchainStatus;
+
+	@Column(name = "blockchain_payload", columnDefinition = "TEXT")
+	private String blockchainPayload;
+
+	@Column(name = "blockchain_payload_hash", length = 66)
+	private String blockchainPayloadHash;
+
+	@Column(name = "blockchain_attempts", nullable = false)
+	private int blockchainAttempts;
+
+	@Column(name = "blockchain_error", length = 500)
+	private String blockchainError;
+
 	@Column(nullable = false)
 	private Instant occurredAt;
 
@@ -57,5 +72,32 @@ public class OwnershipHistoryEntry {
 	public UserAccount getOwner() { return owner; }
 	public String getEvent() { return event; }
 	public String getTransactionReference() { return transactionReference; }
+	public String getBlockchainStatus() { return blockchainStatus; }
+	public String getBlockchainPayload() { return blockchainPayload; }
+	public String getBlockchainPayloadHash() { return blockchainPayloadHash; }
+	public int getBlockchainAttempts() { return blockchainAttempts; }
+	public String getBlockchainError() { return blockchainError; }
 	public Instant getOccurredAt() { return occurredAt; }
+	public void queueBlockchainProof(String payload, String payloadHash) {
+		blockchainPayload = payload;
+		blockchainPayloadHash = payloadHash;
+		blockchainStatus = "PENDING";
+		blockchainError = null;
+	}
+	public void setTransactionReference(String transactionReference) {
+		this.transactionReference = transactionReference;
+	}
+	public void recordBlockchainAttempt(String error) {
+		blockchainAttempts++;
+		blockchainError = error;
+	}
+	public void confirmBlockchainProof(String transactionReference) {
+		this.transactionReference = transactionReference;
+		blockchainStatus = "CONFIRMED";
+		blockchainError = null;
+	}
+	public void failBlockchainProof(String error) {
+		blockchainStatus = "FAILED";
+		blockchainError = error;
+	}
 }

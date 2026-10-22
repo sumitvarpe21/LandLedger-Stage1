@@ -56,6 +56,7 @@ public class LandLedgerService {
 	private final PasswordEncoder passwords;
 	private final JwtEncoder jwtEncoder;
 	private final JsonMapper jsonMapper;
+	private final BlockchainProofService blockchainProofs;
 
 	@Value("${landledger.jwt-issuer}")
 	private String jwtIssuer;
@@ -73,7 +74,8 @@ public class LandLedgerService {
 			OwnershipHistoryRepository history,
 			PasswordEncoder passwords,
 			JwtEncoder jwtEncoder,
-			JsonMapper jsonMapper) {
+			JsonMapper jsonMapper,
+			BlockchainProofService blockchainProofs) {
 		this.users = users;
 		this.parcels = parcels;
 		this.requests = requests;
@@ -84,6 +86,7 @@ public class LandLedgerService {
 		this.passwords = passwords;
 		this.jwtEncoder = jwtEncoder;
 		this.jsonMapper = jsonMapper;
+		this.blockchainProofs = blockchainProofs;
 	}
 
 	@Transactional
@@ -235,7 +238,9 @@ public class LandLedgerService {
 			} catch (DataIntegrityViolationException exception) {
 				throw ApiException.conflict("Parcel ID is already registered");
 			}
-			history.save(new OwnershipHistoryEntry(parcel, request.getApplicant(), "Registration approved"));
+			OwnershipHistoryEntry entry = history.saveAndFlush(
+				new OwnershipHistoryEntry(parcel, request.getApplicant(), "Registration approved"));
+			blockchainProofs.queue(entry);
 			createNotification(request.getApplicant(), "Registration request " + requestId + " was approved");
 		} else if (input.status() == RegistrationRequest.Status.REJECTED) {
 			createNotification(request.getApplicant(),
@@ -265,7 +270,9 @@ public class LandLedgerService {
 		} catch (DataIntegrityViolationException exception) {
 			throw ApiException.conflict("Parcel ID is already registered");
 		}
-		history.save(new OwnershipHistoryEntry(parcel, owner, "Parcel registered by administrator"));
+		OwnershipHistoryEntry entry = history.saveAndFlush(
+			new OwnershipHistoryEntry(parcel, owner, "Parcel registered by administrator"));
+		blockchainProofs.queue(entry);
 		createNotification(owner, "Parcel " + parcel.getParcelId() + " was registered to you");
 		recordAudit(admin, "Created parcel " + parcel.getParcelId() + " for " + owner.getEmail());
 		return parcelView(parcel);
@@ -355,8 +362,9 @@ public class LandLedgerService {
 		transfer.setDecidedAt(Instant.now());
 		if (input.status() == Status.APPROVED) {
 			transfer.getParcel().setOwner(transfer.getToOwner());
-			history.save(new OwnershipHistoryEntry(transfer.getParcel(), transfer.getToOwner(),
-				"Transfer " + transferId + " approved"));
+			OwnershipHistoryEntry entry = history.saveAndFlush(new OwnershipHistoryEntry(
+				transfer.getParcel(), transfer.getToOwner(), "Transfer " + transferId + " approved"));
+			blockchainProofs.queue(entry);
 			createNotification(transfer.getToOwner(), "Parcel " + transfer.getParcel().getParcelId() + " was transferred to you");
 		}
 		createNotification(transfer.getFromOwner(),
